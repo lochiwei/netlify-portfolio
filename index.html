@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="作品集首頁，整理 publish 目錄中的網頁作品入口。">
+  <title>作品集首頁</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <script src="./js/main.js" defer></script>
+</head>
+<body data-theme="dark">
+  <header class="site-header">
+    <nav class="topbar" aria-label="首頁導覽">
+      <a class="brand" href="./index.html" aria-label="回到作品集首頁">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>作品集首頁</span>
+      </a>
+
+      <div class="theme-switcher" aria-label="切換首頁風格">
+        <button class="theme-button" type="button" data-theme-choice="dark" aria-pressed="true">精緻深色</button>
+        <button class="theme-button" type="button" data-theme-choice="light" aria-pressed="false">明亮簡潔</button>
+        <button class="theme-button" type="button" data-theme-choice="geo" aria-pressed="false">活潑幾何</button>
+      </div>
+    </nav>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <p class="eyebrow">Static Web Portfolio</p>
+        <h1 id="page-title">作品集首頁</h1>
+        <p class="hero-text">整理目前發布資料夾中的網頁作品，快速進入報告、展示與互動內容。</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <span class="axis axis-x"></span>
+        <span class="axis axis-y"></span>
+        <span class="node node-a"></span>
+        <span class="node node-b"></span>
+        <span class="node node-c"></span>
+      </div>
+    </section>
+  </header>
+
+  <main>
+    <section class="portfolio-section" aria-labelledby="work-title">
+      <div class="section-heading">
+        <p class="eyebrow">Published Pages</p>
+        <h2 id="work-title">網頁作品</h2>
+      </div>
+
+      <div class="work-grid">
+        <a class="work-card" href="./ggb_us_flag_report_v2.html">
+          <span class="card-kicker">GeoGebra Report</span>
+          <h3>GeoGebra 美國國旗製圖報告</h3>
+          <p>包含互動展示、官方規格對照、顏色規格與完整製圖邏輯。</p>
+          <span class="card-footer">開啟頁面</span>
+        </a>
+
+        <a class="work-card" href="./ggb_us_flag_report_codex.html">
+          <span class="card-kicker">GeoGebra Report</span>
+          <h3>GeoGebra 美國國旗製圖報告</h3>
+          <p>精簡版製圖報告，聚焦作圖依據、主要尺寸設定與成果檢查。</p>
+          <span class="card-footer">開啟頁面</span>
+        </a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

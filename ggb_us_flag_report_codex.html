@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GeoGebra 美國國旗製圖報告</title>
+  <style>
+    :root {
+      --red: #b22234;
+      --blue: #3c3b6e;
+      --ink: #1f2933;
+      --muted: #52616f;
+      --line: #d9e2ec;
+      --paper: #ffffff;
+      --bg: #f5f7fa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.7;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+
+    header {
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 2rem;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 34px 0 12px;
+      font-size: 1.25rem;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    a {
+      color: #0b65c2;
+    }
+
+    .meta {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .sheet {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 28px;
+      box-shadow: 0 14px 38px rgba(31, 41, 51, 0.08);
+    }
+
+    .flag-wrap {
+      margin: 24px 0 8px;
+      border: 1px solid var(--line);
+      background: #eef2f7;
+      padding: 18px;
+      border-radius: 8px;
+    }
+
+    .flag {
+      position: relative;
+      width: min(100%, 760px);
+      aspect-ratio: 19 / 10;
+      margin: 0 auto;
+      background: repeating-linear-gradient(
+        to bottom,
+        var(--red) 0,
+        var(--red) calc(100% / 13),
+        #fff calc(100% / 13),
+        #fff calc(200% / 13)
+      );
+      box-shadow: 0 0 0 1px rgba(31, 41, 51, 0.28);
+    }
+
+    .canton {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 40%;
+      height: calc(700% / 13);
+      background: var(--blue);
+      display: grid;
+      grid-template-rows: repeat(9, 1fr);
+      padding: 2.8% 3.2%;
+    }
+
+    .star-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      color: #fff;
+      font-size: clamp(8px, 1.6vw, 14px);
+      line-height: 1;
+    }
+
+    .formula-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .formula {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #fbfcfe;
+    }
+
+    .formula strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    code,
+    pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92rem;
+    }
+
+    code {
+      background: #edf2f7;
+      border-radius: 4px;
+      padding: 0.1em 0.35em;
+    }
+
+    pre {
+      overflow-x: auto;
+      margin: 12px 0 0;
+      padding: 14px;
+      border-radius: 8px;
+      background: #111827;
+      color: #f9fafb;
+      line-height: 1.55;
+    }
+
+    ul {
+      margin: 8px 0 0;
+      padding-left: 1.4rem;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    .note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 720px) {
+      main {
+        padding: 28px 14px 42px;
+      }
+
+      .sheet {
+        padding: 20px;
+      }
+
+      .formula-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <article class="sheet">
+      <header>
+        <h1>GeoGebra 美國國旗製圖報告</h1>
+        <p class="meta">檔案：<code>us_flag_official.ggb</code>；座標基準：<code>A=(0,0)</code> 為國旗左下角。</p>
+      </header>
+
+      <section aria-labelledby="basis">
+        <h2 id="basis">製圖依據</h2>
+        <p>
+          本圖依照美國國旗正式尺寸比例製作，主要依據為
+          <a href="https://www.archives.gov/federal-register/codification/executive-order/10834.html">Executive Order 10834</a>
+          所列之旗面比例、聯邦藍底尺寸、星點排列與星形尺寸。
+        </p>
+        <div class="flag-wrap" aria-label="美國國旗比例示意">
+          <div class="flag">
+            <div class="canton">
+              <div class="star-row">★ ★ ★ ★ ★ ★</div>
+              <div class="star-row">★ ★ ★ ★ ★</div>
+              <div class="star-row">★ ★ ★ ★ ★ ★</div>
+              <div class="star-row">★ ★ ★ ★ ★</div>
+              <div class="star-row">★ ★ ★ ★ ★ ★</div>
+              <div class="star-row">★ ★ ★ ★ ★</div>
+              <div class="star-row">★ ★ ★ ★ ★ ★</div>
+              <div class="star-row">★ ★ ★ ★ ★</div>
+              <div class="star-row">★ ★ ★ ★ ★ ★</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="dimensions">
+        <h2 id="dimensions">主要尺寸設定</h2>
+        <p>
+          自行選定旗寬 <code>w=19</code>，因此依正式比例得到旗高 <code>h=10</code>。
+          除了使用者指定的點 <code>A</code> 與選定寬度 <code>w</code> 外，其餘尺寸都由 GeoGebra 內部公式推導。
+        </p>
+        <div class="formula-grid">
+          <div class="formula"><strong>旗高</strong><code>h = 10 w / 19</code></div>
+          <div class="formula"><strong>條紋高度</strong><code>s = h / 13</code></div>
+          <div class="formula"><strong>藍底寬度</strong><code>uW = 19 h / 25</code></div>
+          <div class="formula"><strong>藍底高度</strong><code>uH = 7 h / 13</code></div>
+          <div class="formula"><strong>星點水平間距</strong><code>gSpace = uW / 12</code></div>
+          <div class="formula"><strong>星點垂直間距</strong><code>eSpace = uH / 10</code></div>
+          <div class="formula"><strong>星形直徑</strong><code>starD = 77 h / 1250</code></div>
+          <div class="formula"><strong>星形外半徑</strong><code>starR = starD / 2</code></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="logic">
+        <h2 id="logic">GeoGebra 作圖邏輯</h2>
+        <ul>
+          <li>白色底面、紅色條紋與藍底都使用點列形式的 <code>Polygon({ ... })</code>，只建立需要填色的多邊形，不額外建立四周線段。</li>
+          <li>7 條紅色條紋以 <code>Sequence</code> 產生，避免逐一建立重複物件。</li>
+          <li>50 顆星以 9 列交錯排列，列數為 <code>6,5,6,5,6,5,6,5,6</code>。</li>
+          <li>星形本身由外半徑與內半徑交替的 10 個頂點形成，再交給 <code>Polygon(Sequence(...))</code> 填色。</li>
+          <li>國旗外框只需要描邊，因此使用 <code>Polyline(A + {...})</code> 建立封閉折線。</li>
+        </ul>
+
+        <pre><code>whiteField = Polygon(A + {(0, 0), (w, 0), (w, h), (0, h)})
+redStripes = Sequence(
+  Polygon(A + {(0, 2 k s), (w, 2 k s), (w, (2 k + 1) s), (0, (2 k + 1) s)}),
+  k, 0, 6
+)
+blueCanton = Polygon(A + {(0, h - uH), (uW, h - uH), (uW, h), (0, h)})
+flagBoundary = Polyline(A + {(0, 0), (w, 0), (w, h), (0, h), (0, 0)})</code></pre>
+      </section>
+
+      <section aria-labelledby="result">
+        <h2 id="result">成果檢查</h2>
+        <p>
+          完成的 GeoGebra 檔案已通過壓縮結構與 XML 解析檢查。圖中保留可檢查的核心物件名稱，
+          包含 <code>A</code>、<code>w</code>、<code>h</code>、<code>whiteField</code>、<code>redStripes</code>、
+          <code>blueCanton</code>、<code>stars</code> 與 <code>flagBoundary</code>。
+        </p>
+        <p class="note">報告日期：2026-05-30；製作工具：GeoGebra 檔案結構與 GeoGebra 指令。</p>
+      </section>
+    </article>
+  </main>
+</body>
+</html>

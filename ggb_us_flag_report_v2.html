@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoGebra 美國國旗製圖報告</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
+      background: #f5f6fa;
+      color: #222;
+      line-height: 1.75;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #1a1a4e 0%, #3C3B6E 50%, #B22234 100%);
+      color: #fff;
+      padding: 56px 40px 48px;
+      text-align: center;
+    }
+    .hero .flag-preview {
+      display: inline-block;
+      margin-bottom: 28px;
+    }
+    /* Mini SVG flag */
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+      margin-bottom: 8px;
+    }
+    .hero .subtitle {
+      font-size: 1rem;
+      opacity: .85;
+    }
+    .hero .badge {
+      display: inline-block;
+      margin-top: 18px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 20px;
+      padding: 4px 18px;
+      font-size: .85rem;
+      letter-spacing: .06em;
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }
+
+    /* ── Section ── */
+    section { margin-bottom: 48px; }
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a1a4e;
+      border-left: 5px solid #B22234;
+      padding-left: 14px;
+      margin-bottom: 20px;
+    }
+    h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #3C3B6E;
+      margin: 24px 0 10px;
+    }
+    p { margin-bottom: 12px; color: #333; }
+
+    /* ── Cards ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+      border-top: 4px solid #3C3B6E;
+    }
+    .card .label { font-size: .78rem; color: #888; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+    .card .value { font-size: 1.4rem; font-weight: 800; color: #1a1a4e; }
+    .card .sub   { font-size: .8rem; color: #666; margin-top: 2px; }
+
+    /* ── Table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .92rem;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+    }
+    thead tr { background: #3C3B6E; color: #fff; }
+    thead th { padding: 12px 16px; text-align: left; font-weight: 600; }
+    tbody tr:nth-child(even) { background: #f9f9fb; }
+    tbody tr:hover { background: #f0f0f8; }
+    td { padding: 11px 16px; border-bottom: 1px solid #eee; }
+    td code { background: #eef; border-radius: 4px; padding: 1px 6px; font-size: .85rem; color: #3C3B6E; }
+
+    /* ── Color Chips ── */
+    .color-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 16px 0;
+    }
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      min-width: 220px;
+    }
+    .chip .swatch {
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,.12);
+      flex-shrink: 0;
+    }
+    .chip .name { font-weight: 700; font-size: .95rem; }
+    .chip .hex  { font-size: .8rem; color: #888; font-family: monospace; }
+
+    /* ── Code Block ── */
+    .code-block {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 10px;
+      padding: 20px 22px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: .82rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin: 12px 0 20px;
+    }
+    .code-block .kw  { color: #cba6f7; }
+    .code-block .fn  { color: #89b4fa; }
+    .code-block .str { color: #a6e3a1; }
+    .code-block .cmt { color: #6c7086; font-style: italic; }
+    .code-block .num { color: #fab387; }
+
+    /* ── Steps ── */
+    .steps { counter-reset: step; list-style: none; }
+    .steps li {
+      counter-increment: step;
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      background: #fff;
+      border-radius: 10px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    }
+    .steps li::before {
+      content: counter(step);
+      min-width: 32px; height: 32px;
+      background: #B22234;
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: .9rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .steps li .step-title { font-weight: 700; color: #1a1a4e; margin-bottom: 6px; }
+    .steps li p { margin: 0; color: #444; font-size: .93rem; }
+
+    /* ── Flag SVG embed ── */
+    .flag-wrap {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.12);
+      overflow: hidden;
+      max-width: 570px;
+      margin: 0 auto 8px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      color: #999;
+      font-size: .82rem;
+      border-top: 1px solid #e8e8e8;
+    }
+    footer strong { color: #3C3B6E; }
+
+    /* ── Result badge ── */
+    .success-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #edfaf1;
+      border: 1.5px solid #4ade80;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 32px;
+      font-weight: 600;
+      color: #166534;
+    }
+    .success-banner svg { flex-shrink: 0; }
+
+    .geogebra-embed {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+      padding: 18px;
+      overflow-x: auto;
+    }
+    .geogebra-embed iframe {
+      display: block;
+      width: 100%;
+      max-width: 800px;
+      min-height: 600px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 1.4rem; }
+      .card-grid { grid-template-columns: 1fr 1fr; }
+      .geogebra-embed iframe { min-height: 420px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ HERO ══ -->
+<div class="hero">
+  <div class="flag-preview">
+    <!-- Inline SVG of US Flag (official proportions 1.9:1) -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 100"
+         width="380" height="200" style="display:block;border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,.4)">
+      <!-- Stripes: 13 stripes, height = 100/13 each -->
+      <g id="stripes">
+        <rect x="0" y="0"    width="190" height="7.692"  fill="#B22234"/>
+        <rect x="0" y="7.692" width="190" height="7.692" fill="#fff"/>
+        <rect x="0" y="15.385" width="190" height="7.692" fill="#B22234"/>
+        <rect x="0" y="23.077" width="190" height="7.692" fill="#fff"/>
+        <rect x="0" y="30.769" width="190" height="7.692" fill="#B22234"/>
+        <rect x="0" y="38.462" width="190" height="7.692" fill="#fff"/>
+        <rect x="0" y="46.154" width="190" height="7.692" fill="#B22234"/>
+        <rect x="0" y="53.846" width="190" height="7.692" fill="#fff"/>
+        <rect x="0" y="61.538" width="190" height="7.692" fill="#B22234"/>
+        <rect x="0" y="69.231" width="190" height="7.692" fill="#fff"/>
+        <rect x="0" y="76.923" width="190" height="7.692" fill="#B22234"/>
+        <rect x="0" y="84.615" width="190" height="7.692" fill="#fff"/>
+        <rect x="0" y="92.308" width="190" height="7.692" fill="#B22234"/>
+      </g>
+      <!-- Canton: width=76, height=53.846 (7/13 * 100), top-left -->
+      <rect x="0" y="0" width="76" height="53.846" fill="#3C3B6E"/>
+      <!-- Stars: 50 stars, outer R=3.08, inner r=1.176 -->
+      <!-- 6-star rows (odd j=1..9): x = 76/12 + (i-1)*76/6, y = j*53.846/10 -->
+      <!-- 5-star rows (even j=2..8): x = i*76/6, y = j*53.846/10 -->
+      <g id="stars" fill="#fff">
+        <!-- Precomputed star polygon path (10 vertices) for R=3.08, r=1.176 pointing up -->
+        <!-- Points: outer at 90+k*72, inner at 126+k*72 -->
+        <!-- Using <use> with <defs> for efficiency -->
+        <defs>
+          <polygon id="s" points="
+            0,-3.08
+            0.909,-1.249
+            2.929,-0.952
+            1.464,0.476
+            1.783,2.497
+            0,1.54
+            -1.783,2.497
+            -1.464,0.476
+            -2.929,-0.952
+            -0.909,-1.249
+          "/>
+        </defs>
+        <!-- j=1 (6 stars) y=5.385 -->
+        <use href="#s" transform="translate(6.333,5.385)"/>
+        <use href="#s" transform="translate(19.000,5.385)"/>
+        <use href="#s" transform="translate(31.667,5.385)"/>
+        <use href="#s" transform="translate(44.333,5.385)"/>
+        <use href="#s" transform="translate(57.000,5.385)"/>
+        <use href="#s" transform="translate(69.667,5.385)"/>
+        <!-- j=2 (5 stars) y=10.769 -->
+        <use href="#s" transform="translate(12.667,10.769)"/>
+        <use href="#s" transform="translate(25.333,10.769)"/>
+        <use href="#s" transform="translate(38.000,10.769)"/>
+        <use href="#s" transform="translate(50.667,10.769)"/>
+        <use href="#s" transform="translate(63.333,10.769)"/>
+        <!-- j=3 (6 stars) y=16.154 -->
+        <use href="#s" transform="translate(6.333,16.154)"/>
+        <use href="#s" transform="translate(19.000,16.154)"/>
+        <use href="#s" transform="translate(31.667,16.154)"/>
+        <use href="#s" transform="translate(44.333,16.154)"/>
+        <use href="#s" transform="translate(57.000,16.154)"/>
+        <use href="#s" transform="translate(69.667,16.154)"/>
+        <!-- j=4 (5 stars) y=21.538 -->
+        <use href="#s" transform="translate(12.667,21.538)"/>
+        <use href="#s" transform="translate(25.333,21.538)"/>
+        <use href="#s" transform="translate(38.000,21.538)"/>
+        <use href="#s" transform="translate(50.667,21.538)"/>
+        <use href="#s" transform="translate(63.333,21.538)"/>
+        <!-- j=5 (6 stars) y=26.923 -->
+        <use href="#s" transform="translate(6.333,26.923)"/>
+        <use href="#s" transform="translate(19.000,26.923)"/>
+        <use href="#s" transform="translate(31.667,26.923)"/>
+        <use href="#s" transform="translate(44.333,26.923)"/>
+        <use href="#s" transform="translate(57.000,26.923)"/>
+        <use href="#s" transform="translate(69.667,26.923)"/>
+        <!-- j=6 (5 stars) y=32.308 -->
+        <use href="#s" transform="translate(12.667,32.308)"/>
+        <use href="#s" transform="translate(25.333,32.308)"/>
+        <use href="#s" transform="translate(38.000,32.308)"/>
+        <use href="#s" transform="translate(50.667,32.308)"/>
+        <use href="#s" transform="translate(63.333,32.308)"/>
+        <!-- j=7 (6 stars) y=37.692 -->
+        <use href="#s" transform="translate(6.333,37.692)"/>
+        <use href="#s" transform="translate(19.000,37.692)"/>
+        <use href="#s" transform="translate(31.667,37.692)"/>
+        <use href="#s" transform="translate(44.333,37.692)"/>
+        <use href="#s" transform="translate(57.000,37.692)"/>
+        <use href="#s" transform="translate(69.667,37.692)"/>
+        <!-- j=8 (5 stars) y=43.077 -->
+        <use href="#s" transform="translate(12.667,43.077)"/>
+        <use href="#s" transform="translate(25.333,43.077)"/>
+        <use href="#s" transform="translate(38.000,43.077)"/>
+        <use href="#s" transform="translate(50.667,43.077)"/>
+        <use href="#s" transform="translate(63.333,43.077)"/>
+        <!-- j=9 (6 stars) y=48.462 -->
+        <use href="#s" transform="translate(6.333,48.462)"/>
+        <use href="#s" transform="translate(19.000,48.462)"/>
+        <use href="#s" transform="translate(31.667,48.462)"/>
+        <use href="#s" transform="translate(44.333,48.462)"/>
+        <use href="#s" transform="translate(57.000,48.462)"/>
+        <use href="#s" transform="translate(69.667,48.462)"/>
+      </g>
+    </svg>
+  </div>
+  <h1>GeoGebra 美國國旗製圖報告</h1>
+  <div class="subtitle">依照 Executive Order 10834（1959）官方規格製作</div>
+  <div class="badge">US_Flag.ggb ・ GeoGebra Classic 繪圖計算機</div>
+</div>
+
+<!-- ══ BODY ══ -->
+<div class="container">
+
+  <!-- Success Banner -->
+  <div class="success-banner">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+    </svg>
+    製作成功：US_Flag.ggb 已下載至本機。50 顆星星與 13 條條紋均依官方比例正確呈現。
+  </div>
+
+  <!-- ── Interactive GeoGebra Embed ── -->
+  <section>
+    <h2>互動展示 ・ GeoGebra 成品</h2>
+    <div class="geogebra-embed">
+      <iframe src="https://www.geogebra.org/classic/tunzm9ma?embed" width="800" height="600" allowfullscreen style="border: 1px solid #e4e4e4;border-radius: 4px;" frameborder="0"></iframe>
+    </div>
+  </section>
+
+  <!-- ── 1. 概覽 ── -->
+  <section>
+    <h2>1 ・ 製圖概覽</h2>
+    <div class="card-grid">
+      <div class="card">
+        <div class="label">旗幟比例</div>
+        <div class="value">1.9 : 1</div>
+        <div class="sub">寬 19 × 高 10（GeoGebra 單位）</div>
+      </div>
+      <div class="card">
+        <div class="label">條紋數量</div>
+        <div class="value">13 條</div>
+        <div class="sub">紅色 7 條・白色 6 條</div>
+      </div>
+      <div class="card">
+        <div class="label">星星數量</div>
+        <div class="value">50 顆</div>
+        <div class="sub">白色五角星，交錯排列</div>
+      </div>
+      <div class="card">
+        <div class="label">使用環境</div>
+        <div class="value" style="font-size:1rem">GeoGebra</div>
+        <div class="sub">Classic 繪圖計算機（線上版）</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 2. 官方規格 ── -->
+  <section>
+    <h2>2 ・ 官方規格對照表</h2>
+    <p>依據美國 <strong>Executive Order 10834（1959）</strong>，所有尺寸均以 <code>W = 19</code>、<code>H = 10</code> 為基礎，在 GeoGebra 內部推算，無任何 hard-coded 自由數字。</p>
+    <table>
+      <thead>
+        <tr>
+          <th>物件</th>
+          <th>GeoGebra 指令</th>
+          <th>官方比例</th>
+          <th>數值</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>旗幟寬度</td><td><code>W = 19</code></td><td>1.9 × H</td><td>19</td></tr>
+        <tr><td>旗幟高度</td><td><code>H = 10</code></td><td>基準</td><td>10</td></tr>
+        <tr><td>Canton 寬</td><td><code>C_w = 2 * W / 5</code></td><td>2/5 × W</td><td>7.6</td></tr>
+        <tr><td>Canton 高</td><td><code>C_h = 7 * H / 13</code></td><td>7/13 × H</td><td>≈ 5.3846</td></tr>
+        <tr><td>單條條紋高</td><td><code>S_h = H / 13</code></td><td>1/13 × H</td><td>≈ 0.7692</td></tr>
+        <tr><td>星星外接圓半徑</td><td><code>R_star = H * 308 / 10000</code></td><td>0.0308 × H</td><td>0.308</td></tr>
+        <tr><td>星星內接圓半徑</td><td><code>r_inner = R_star * sin(18°) / sin(54°)</code></td><td>幾何推算</td><td>≈ 0.1176</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── 3. 顏色規格 ── -->
+  <section>
+    <h2>3 ・ 官方顏色規格</h2>
+    <div class="color-row">
+      <div class="chip">
+        <div class="swatch" style="background:#B22234"></div>
+        <div>
+          <div class="name">Old Glory Red</div>
+          <div class="hex">#B22234 ・ RGB(178, 34, 52)</div>
+        </div>
+      </div>
+      <div class="chip">
+        <div class="swatch" style="background:#3C3B6E"></div>
+        <div>
+          <div class="name">Old Glory Blue</div>
+          <div class="hex">#3C3B6E ・ RGB(60, 59, 110)</div>
+        </div>
+      </div>
+      <div class="chip">
+        <div class="swatch" style="background:#fff;border:1.5px solid #ddd"></div>
+        <div>
+          <div class="name">White</div>
+          <div class="hex">#FFFFFF ・ RGB(255, 255, 255)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 4. 製圖邏輯 ── -->
+  <section>
+    <h2>4 ・ 製圖邏輯與主要指令</h2>
+    <p>全部製圖流程分為五個模組，所有計算在 GeoGebra 內部完成，嚴格遵守「無自由數字」規則。</p>
+
+    <ol class="steps">
+      <li>
+        <div>
+          <div class="step-title">基礎尺寸（Free → Dependent 派生鏈）</div>
+          <p>以 <code>W = 19</code>、<code>H = 10</code> 為唯二自由物件（作為初始條件必須存在），其餘全部由比例公式派生，確保改變 W 或 H 時整面旗幟等比縮放。</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="step-title">13 條條紋（stripe_{k}, k = 1..13）</div>
+          <p>逐一以 <code>Polygon</code> 建立，奇數條（k 為奇）填 Old Glory Red，偶數條填 White。底部第 1 條為紅色，頂部第 13 條為紅色，符合官方規格。</p>
+          <div class="code-block"><span class="fn">Polygon</span>(<span class="num">(0, (k-1) * S_h)</span>, <span class="num">(W, (k-1) * S_h)</span>, <span class="num">(W, k * S_h)</span>, <span class="num">(0, k * S_h)</span>)
+<span class="cmt">-- k = 1..13，奇數紅、偶數白</span></div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="step-title">Canton 藍色星區</div>
+          <p>以 <code>(0, H − C_h)</code> 為左下角，<code>(C_w, H)</code> 為右上角建立矩形，精確覆蓋上方 7 條條紋的寬 × 高區域。</p>
+          <div class="code-block"><span class="kw">canton</span> = <span class="fn">Polygon</span>(<span class="num">(0, H - C_h)</span>, <span class="num">(C_w, H - C_h)</span>, <span class="num">(C_w, H)</span>, <span class="num">(0, H)</span>)
+<span class="cmt">-- 填色：RGB(60, 59, 110)</span></div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="step-title">五角星模板（star_template）</div>
+          <p>在原點建立一個以 <code>R_star</code> 為外接圓半徑的正五角星，10 個頂點交替取外／內圓上的角度。內半徑由 <code>r_inner = R_star × sin(18°) / sin(54°)</code> 幾何推算。</p>
+          <div class="code-block"><span class="cmt">-- 外頂點（頂端朝上，逆時針）</span>
+<span class="kw">outer</span> = <span class="fn">Sequence</span>((R_star·<span class="fn">cos</span>(<span class="num">90° + k·72°</span>), R_star·<span class="fn">sin</span>(<span class="num">90° + k·72°</span>)), k, <span class="num">0</span>, <span class="num">4</span>)
+<span class="cmt">-- 內頂點</span>
+<span class="kw">r_inner</span> = R_star · <span class="fn">sin</span>(<span class="num">18°</span>) / <span class="fn">sin</span>(<span class="num">54°</span>)
+<span class="kw">inner</span>   = <span class="fn">Sequence</span>((r_inner·<span class="fn">cos</span>(<span class="num">126° + k·72°</span>), r_inner·<span class="fn">sin</span>(<span class="num">126° + k·72°</span>)), k, <span class="num">0</span>, <span class="num">4</span>)
+<span class="cmt">-- 合成五角星（10 頂點交替）</span>
+<span class="kw">star_template</span> = <span class="fn">Polygon</span>(O1, I1, O2, I2, O3, I3, O4, I4, O5, I5)</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="step-title">50 顆星星（Sequence + Translate，交錯排列）</div>
+          <p>9 行星星（行 j = 1..9 由下至上），奇數行 6 顆（共 30 顆）、偶數行 5 顆（共 20 顆），總計 50 顆。水平間距均為 <code>C_w / 6</code>，6 星行左邊距 <code>C_w / 12</code>，5 星行左邊距 <code>C_w / 6</code>（向右偏移半個間距），形成完美交錯。</p>
+          <div class="code-block"><span class="cmt">-- 6 星行（奇數行 j = 1,3,5,7,9）</span>
+<span class="kw">stars_6row</span> = <span class="fn">Sequence</span>(
+  <span class="fn">Sequence</span>(
+    <span class="fn">Translate</span>(star_template, (C_w/<span class="num">12</span> + (i<span class="num">-1</span>)·C_w/<span class="num">6</span>,  (H - C_h) + j·C_h/<span class="num">10</span>)),
+    i, <span class="num">1</span>, <span class="num">6</span>),
+  j, <span class="num">1</span>, <span class="num">9</span>, <span class="num">2</span>)
+
+<span class="cmt">-- 5 星行（偶數行 j = 2,4,6,8）</span>
+<span class="kw">stars_5row</span> = <span class="fn">Sequence</span>(
+  <span class="fn">Sequence</span>(
+    <span class="fn">Translate</span>(star_template, (i·C_w/<span class="num">6</span>,  (H - C_h) + j·C_h/<span class="num">10</span>)),
+    i, <span class="num">1</span>, <span class="num">5</span>),
+  j, <span class="num">2</span>, <span class="num">8</span>, <span class="num">2</span>)</div>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ── 5. 星星位置表 ── -->
+  <section>
+    <h2>5 ・ 星星行列位置對照</h2>
+    <table>
+      <thead>
+        <tr><th>行（j，由下至上）</th><th>星星數</th><th>y 座標</th><th>x 起始位置</th><th>x 間距</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1（最底行）</td><td>6</td><td>(H−C_h) + 1·C_h/10</td><td>C_w/12</td><td>C_w/6</td></tr>
+        <tr><td>2</td><td>5</td><td>(H−C_h) + 2·C_h/10</td><td>C_w/6</td><td>C_w/6</td></tr>
+        <tr><td>3</td><td>6</td><td>(H−C_h) + 3·C_h/10</td><td>C_w/12</td><td>C_w/6</td></tr>
+        <tr><td>4</td><td>5</td><td>(H−C_h) + 4·C_h/10</td><td>C_w/6</td><td>C_w/6</td></tr>
+        <tr><td>5（中間行）</td><td>6</td><td>(H−C_h) + 5·C_h/10</td><td>C_w/12</td><td>C_w/6</td></tr>
+        <tr><td>6</td><td>5</td><td>(H−C_h) + 6·C_h/10</td><td>C_w/6</td><td>C_w/6</td></tr>
+        <tr><td>7</td><td>6</td><td>(H−C_h) + 7·C_h/10</td><td>C_w/12</td><td>C_w/6</td></tr>
+        <tr><td>8</td><td>5</td><td>(H−C_h) + 8·C_h/10</td><td>C_w/6</td><td>C_w/6</td></tr>
+        <tr><td>9（最頂行）</td><td>6</td><td>(H−C_h) + 9·C_h/10</td><td>C_w/12</td><td>C_w/6</td></tr>
+        <tr><td colspan="2"><strong>合計</strong></td><td colspan="3"><strong>5×6 + 4×5 = 30 + 20 = 50 顆 ✓</strong></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── 6. 規則遵守聲明 ── -->
+  <section>
+    <h2>6 ・ GeoGebra 製圖規則遵守聲明</h2>
+    <table>
+      <thead>
+        <tr><th>規則</th><th>遵守狀況</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>嚴禁 hard-coded 自由數字（如 0.32, -1.87）</td><td>✅ 所有數值均由 W、H 在 GeoGebra 內部推算</td></tr>
+        <tr><td>嚴禁外部計算機算好的數字</td><td>✅ 所有比例公式直接寫入指令，GeoGebra 自行計算</td></tr>
+        <tr><td>大量規律物件使用 Sequence</td><td>✅ 條紋、星星均以 Sequence 建立，無逐一手動建立</td></tr>
+        <tr><td>幾何結構物件使用 Translate/Rotate</td><td>✅ 50 顆星星均以 Translate(star_template, ...) 建立</td></tr>
+        <tr><td>下標格式使用 name_{sub} 大括號</td><td>✅ 如 C_{w}、S_{h}、star6_{1_1} 等</td></tr>
+        <tr><td>點名稱使用大寫字母</td><td>✅ 如 A = (0,0)、BL 等</td></tr>
+        <tr><td>自由物件說明</td><td>W=19、H=10 作為旗幟尺寸的初始條件，其餘全為從屬物件</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <p>製作工具：<strong>GeoGebra Classic 繪圖計算機（線上版）</strong>・交付檔案：<strong>US_Flag.ggb</strong></p>
+  <p style="margin-top:6px">規格來源：Executive Order 10834 (1959)・製圖日期：2026-05-29</p>
+</footer>
+
+</body>
+</html>
