@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoGebra 製圖報告 — 正十邊形 String Art</title>
+  <style>
+    :root {
+      --green-dark:  #1a5c2a;
+      --green-mid:   #2e7d32;
+      --green-light: #e8f5e9;
+      --green-accent:#43a047;
+      --bg:          #f9fafb;
+      --text:        #1a1a1a;
+      --code-bg:     #f0f4f0;
+      --border:      #c8e6c9;
+      --shadow:      0 2px 12px rgba(30,80,40,.10);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 16px;
+    }
+
+    /* ── header ── */
+    header {
+      background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 60%, var(--green-accent) 100%);
+      color: #fff;
+      padding: 48px 40px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    header::after {
+      content: "";
+      position: absolute;
+      right: -60px; top: -60px;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.06);
+    }
+    header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 20px;
+      padding: 3px 14px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    header h1 {
+      font-size: clamp(22px, 4vw, 36px);
+      font-weight: 700;
+      letter-spacing: -.5px;
+      line-height: 1.3;
+    }
+    header p.sub {
+      margin-top: 10px;
+      font-size: 15px;
+      opacity: .85;
+    }
+
+    /* ── layout ── */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ── section card ── */
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 36px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow);
+    }
+    .card h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--green-dark);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card h2 .icon {
+      width: 28px; height: 28px;
+      background: var(--green-light);
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--green-mid);
+      margin: 20px 0 8px;
+    }
+    .card p { margin-bottom: 12px; }
+    .card ul {
+      list-style: none;
+      padding: 0;
+    }
+    .card ul li {
+      padding: 6px 0 6px 20px;
+      position: relative;
+      border-bottom: 1px dashed var(--border);
+    }
+    .card ul li:last-child { border-bottom: none; }
+    .card ul li::before {
+      content: "▸";
+      position: absolute; left: 0;
+      color: var(--green-accent);
+      font-size: 12px;
+      top: 9px;
+    }
+
+    /* ── info grid (params) ── */
+    .param-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .param-item {
+      background: var(--green-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .param-item .val {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--green-dark);
+      line-height: 1.1;
+    }
+    .param-item .lbl {
+      font-size: 12px;
+      color: #555;
+      margin-top: 4px;
+    }
+    .param-item code {
+      display: block;
+      font-size: 13px;
+      color: var(--green-mid);
+      font-family: "Fira Code", "Courier New", monospace;
+      margin-top: 2px;
+    }
+
+    /* ── code blocks ── */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--green-accent);
+      border-radius: 8px;
+      padding: 20px 22px;
+      overflow-x: auto;
+      font-size: 13.5px;
+      line-height: 1.7;
+      margin: 14px 0;
+    }
+    pre code {
+      font-family: "Fira Code", "Courier New", monospace;
+      color: #2d5a27;
+    }
+    .comment { color: #888; font-style: italic; }
+    .kw      { color: #1a6e2e; font-weight: 600; }
+    .fn      { color: #0d6efd; }
+    .num     { color: #c0392b; }
+    .var     { color: #8e44ad; }
+
+    /* ── principle diagram (SVG) ── */
+    .diagram-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    /* ── formula box ── */
+    .formula-box {
+      background: var(--green-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 14px 0;
+      font-family: "Fira Code","Courier New",monospace;
+      font-size: 14px;
+      color: var(--green-dark);
+      line-height: 2;
+    }
+
+    /* ── step timeline ── */
+    .steps { counter-reset: step; }
+    .step-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      align-items: flex-start;
+    }
+    .step-num {
+      counter-increment: step;
+      min-width: 36px; height: 36px;
+      background: var(--green-mid);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-item h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--green-dark);
+      margin-bottom: 4px;
+    }
+    .step-item p { font-size: 14px; margin: 0; }
+
+    /* ── tag chips ── */
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .tag {
+      background: var(--green-light);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 13px;
+      color: var(--green-dark);
+    }
+
+    /* ── footer ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+      color: #888;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 600px) {
+      .card { padding: 20px 18px; }
+      header { padding: 32px 20px 28px; }
+      pre { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">GeoGebra 製圖報告</div>
+  <h1>正十邊形 String Art<br>包絡線圖案</h1>
+  <p class="sub">以 O = (0, 0) 為圓心，三組 String Art 重現原圖右半邊的螺旋花瓣圖案</p>
+</header>
+
+<main>
+
+  <!-- ① 幾何結構分析 -->
+  <div class="card">
+    <h2><span class="icon">🔍</span>幾何結構分析</h2>
+    <p>仔細觀察原圖左半邊（帶有 A、B、C、D、E、F 標記），可辨認出以下結構：</p>
+    <p><strong>圖形由一系列「線段」構成，而非曲線。</strong>具體來說是「弦藝術」（String Art）技法——用大量直線線段的<strong>包絡線（Envelope）</strong>，視覺上形成類似拋物線的曲線效果。</p>
+    <h3>整體架構</h3>
+    <ul>
+      <li><strong>外框：</strong>正10邊形（十邊形），以 O 為圓心、r 為半徑的外接圓上10個頂點</li>
+      <li><strong>輻射線（Spokes）：</strong>從 O 連到10個頂點的10條線段</li>
+      <li><strong>三組 String Art 包絡線：</strong>每個扇形三角形（O, V<sub>k</sub>, V<sub>k+1</sub>）內，在三個頂點角各做一組包絡線</li>
+      <li><strong>視覺效果：</strong>30組包絡線 × 每組 m-1 條線段，充滿整個十邊形，形成「花瓣式螺旋」圖案</li>
+    </ul>
+  </div>
+
+  <!-- ② 參數設定 -->
+  <div class="card">
+    <h2><span class="icon">⚙️</span>參數設定</h2>
+    <div class="param-grid">
+      <div class="param-item">
+        <div class="val">10</div>
+        <div class="lbl">正多邊形邊數</div>
+        <code>n = 10</code>
+      </div>
+      <div class="param-item">
+        <div class="val">5</div>
+        <div class="lbl">外接圓半徑</div>
+        <code>r = 5</code>
+      </div>
+      <div class="param-item">
+        <div class="val">40</div>
+        <div class="lbl">每邊等分數</div>
+        <code>m = 40</code>
+      </div>
+      <div class="param-item">
+        <div class="val">3×10</div>
+        <div class="lbl">包絡線組數</div>
+        <code>= 30 組</code>
+      </div>
+    </div>
+    <p style="margin-top:14px;font-size:14px;color:#555;">
+      三個參數均為 GeoGebra 可調滑桿，改變後所有線段自動重算更新，無任何 hard-coded 數值。
+    </p>
+  </div>
+
+  <!-- ③ String Art 原理 -->
+  <div class="card">
+    <h2><span class="icon">📐</span>String Art 包絡線原理</h2>
+    <p>在三角形的某頂點 V，兩邊 VA 和 VB 各取 m 等份後，以<strong>互補參數</strong>連線：</p>
+
+    <div class="formula-box">
+      P₁(j) = V + (j/m)·(A − V)　←　VA 邊第 j/m 分點<br>
+      P₂(j) = V + (j/m)·(B − V)　←　VB 邊第 j/m 分點<br>
+      <strong>連線：P₁(j)  ──  P₂(m − j)</strong>　j = 1, 2, …, m−1
+    </div>
+
+    <p>這 m−1 條線段的<strong>包絡線</strong>在視覺上形成一條與兩邊相切的<strong>拋物線弧</strong>。</p>
+
+    <!-- inline SVG diagram -->
+    <div class="diagram-wrap">
+      <svg width="340" height="230" viewBox="0 0 340 230" xmlns="http://www.w3.org/2000/svg"
+           style="border:1px solid #c8e6c9;border-radius:8px;background:#f9fff9;">
+        <!-- triangle outline -->
+        <line x1="170" y1="20" x2="30" y2="210" stroke="#aaa" stroke-width="1.2" stroke-dasharray="5,3"/>
+        <line x1="170" y1="20" x2="310" y2="210" stroke="#aaa" stroke-width="1.2" stroke-dasharray="5,3"/>
+        <!-- string art lines (pre-computed for demo, 9 lines) -->
+        <line x1="170" y1="20"  x2="282" y2="210" stroke="#43a047" stroke-width=".9" opacity=".7"/>
+        <line x1="156" y1="40"  x2="264" y2="210" stroke="#43a047" stroke-width=".9" opacity=".7"/>
+        <line x1="142" y1="60"  x2="246" y2="210" stroke="#43a047" stroke-width=".9" opacity=".7"/>
+        <line x1="128" y1="80"  x2="228" y2="210" stroke="#43a047" stroke-width=".9" opacity=".7"/>
+        <line x1="114" y1="100" x2="210" y2="210" stroke="#43a047" stroke-width=".9" opacity=".7"/>
+        <line x1="100" y1="120" x2="192" y2="210" stroke="#43a047" stroke-width=".9" opacity=".7"/>
+        <line x1="86"  y1="140" x2="174" y2="210" stroke="#43a047" stroke-width=".9" opacity=".7"/>
+        <line x1="72"  y1="160" x2="156" y2="210" stroke="#43a047" stroke-width=".9" opacity=".7"/>
+        <line x1="58"  y1="180" x2="138" y2="210" stroke="#43a047" stroke-width=".9" opacity=".7"/>
+        <!-- vertex labels -->
+        <circle cx="170" cy="20"  r="4" fill="#1a5c2a"/>
+        <circle cx="30"  cy="210" r="4" fill="#1a5c2a"/>
+        <circle cx="310" cy="210" r="4" fill="#1a5c2a"/>
+        <text x="172" y="16" font-size="13" fill="#1a5c2a" font-weight="bold">V</text>
+        <text x="10"  y="222" font-size="13" fill="#555">A</text>
+        <text x="312" y="222" font-size="13" fill="#555">B</text>
+        <!-- parabola hint -->
+        <path d="M 170 20 Q 100 160 30 210" fill="none" stroke="#c0392b" stroke-width="1.8" stroke-dasharray="6,3" opacity=".6"/>
+        <text x="60" y="130" font-size="11" fill="#c0392b" transform="rotate(-55,60,130)">包絡拋物線</text>
+      </svg>
+    </div>
+
+    <h3>三角形三個頂點的對應公式</h3>
+    <div class="formula-box">
+      <span style="color:#888;">// 頂點 O（圓心角）</span><br>
+      P₁ = (j/m) · V<sub>k</sub>　，　P₂ = ((m−j)/m) · V<sub>k+1</sub><br><br>
+      <span style="color:#888;">// 頂點 V<sub>k</sub></span><br>
+      P₁ = (1−j/m) · V<sub>k</sub>　，　P₂ = (j/m)·V<sub>k</sub> + ((m−j)/m)·V<sub>k+1</sub><br><br>
+      <span style="color:#888;">// 頂點 V<sub>k+1</sub></span><br>
+      P₁ = (1−j/m) · V<sub>k+1</sub>　，　P₂ = (j/m)·V<sub>k+1</sub> + ((m−j)/m)·V<sub>k</sub>
+    </div>
+  </div>
+
+  <!-- ④ 完整指令 -->
+  <div class="card">
+    <h2><span class="icon">💻</span>完整 GeoGebra 指令</h2>
+    <p>依序在 GeoGebra 輸入欄貼入以下指令，即可重現圖形：</p>
+
+<pre><code><span class="comment"># ── 基礎參數 ──────────────────────────────────────</span>
+<span class="var">n</span> = <span class="num">10</span>          <span class="comment"># 正多邊形邊數</span>
+<span class="var">r</span> = <span class="num">5</span>           <span class="comment"># 外接圓半徑</span>
+<span class="var">m</span> = <span class="num">40</span>          <span class="comment"># 每邊等分數（越大越細膩）</span>
+<span class="var">O</span> = (<span class="num">0</span>, <span class="num">0</span>)      <span class="comment"># 中心點（初始條件，唯一自由物件）</span>
+
+<span class="comment"># ── 正十邊形頂點（極座標，從頂部順時針）──────────</span>
+<span class="var">Vlist</span> = <span class="fn">Sequence</span>((<span class="var">r</span>; <span class="num">90</span>° + k × <span class="num">360</span>° / <span class="var">n</span>), k, <span class="num">0</span>, <span class="var">n</span> − <span class="num">1</span>)
+
+<span class="comment"># ── 外框多邊形 ──────────────────────────────────</span>
+<span class="var">polygon_outer</span> = <span class="fn">Polygon</span>(<span class="var">Vlist</span>)
+
+<span class="comment"># ── 輻射線（spokes） ────────────────────────────</span>
+<span class="var">spokes</span> = <span class="fn">Sequence</span>(<span class="fn">Segment</span>(<span class="var">O</span>, <span class="fn">Element</span>(<span class="var">Vlist</span>, k)), k, <span class="num">1</span>, <span class="var">n</span>)
+
+<span class="comment"># ── String Art 組 1：頂點 O 角 ──────────────────</span>
+<span class="comment"># 連接 spoke_k 上 j/m 點 → spoke_{k+1} 上 (m-j)/m 點</span>
+<span class="var">stringsO</span> = <span class="fn">Sequence</span>(<span class="fn">Sequence</span>(
+  <span class="fn">Segment</span>(
+    (j/<span class="var">m</span>) × <span class="fn">Element</span>(<span class="var">Vlist</span>, k),
+    ((<span class="var">m</span>−j)/<span class="var">m</span>) × <span class="fn">Element</span>(<span class="var">Vlist</span>, <span class="fn">Mod</span>(k, <span class="var">n</span>) + <span class="num">1</span>)
+  ), j, <span class="num">1</span>, <span class="var">m</span>−<span class="num">1</span>), k, <span class="num">1</span>, <span class="var">n</span>)
+
+<span class="comment"># ── String Art 組 2：頂點 V_k 角 ────────────────</span>
+<span class="comment"># 在 V_k→O 與 V_k→V_{k+1} 兩邊之間</span>
+<span class="var">stringsVk</span> = <span class="fn">Sequence</span>(<span class="fn">Sequence</span>(
+  <span class="fn">Segment</span>(
+    (<span class="num">1</span> − j/<span class="var">m</span>) × <span class="fn">Element</span>(<span class="var">Vlist</span>, k),
+    (j/<span class="var">m</span>) × <span class="fn">Element</span>(<span class="var">Vlist</span>, k) + ((<span class="var">m</span>−j)/<span class="var">m</span>) × <span class="fn">Element</span>(<span class="var">Vlist</span>, <span class="fn">Mod</span>(k, <span class="var">n</span>) + <span class="num">1</span>)
+  ), j, <span class="num">1</span>, <span class="var">m</span>−<span class="num">1</span>), k, <span class="num">1</span>, <span class="var">n</span>)
+
+<span class="comment"># ── String Art 組 3：頂點 V_{k+1} 角 ────────────</span>
+<span class="comment"># 在 V_{k+1}→O 與 V_{k+1}→V_k 兩邊之間</span>
+<span class="var">stringsVk1</span> = <span class="fn">Sequence</span>(<span class="fn">Sequence</span>(
+  <span class="fn">Segment</span>(
+    (<span class="num">1</span> − j/<span class="var">m</span>) × <span class="fn">Element</span>(<span class="var">Vlist</span>, <span class="fn">Mod</span>(k, <span class="var">n</span>) + <span class="num">1</span>),
+    (j/<span class="var">m</span>) × <span class="fn">Element</span>(<span class="var">Vlist</span>, <span class="fn">Mod</span>(k, <span class="var">n</span>) + <span class="num">1</span>) + ((<span class="var">m</span>−j)/<span class="var">m</span>) × <span class="fn">Element</span>(<span class="var">Vlist</span>, k)
+  ), j, <span class="num">1</span>, <span class="var">m</span>−<span class="num">1</span>), k, <span class="num">1</span>, <span class="var">n</span>)</code></pre>
+  </div>
+
+  <!-- ⑤ 構建步驟 -->
+  <div class="card">
+    <h2><span class="icon">🪜</span>構建步驟</h2>
+    <div class="steps">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div>
+          <h4>建立基礎參數</h4>
+          <p>定義 <code>n=10</code>、<code>r=5</code>、<code>m=40</code> 及圓心 <code>O=(0,0)</code>。三個數值參數可設為滑桿，方便動態調整。</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div>
+          <h4>以極座標建立正十邊形頂點清單</h4>
+          <p>用 <code>Sequence</code> 搭配極座標格式 <code>(r; 90°+k×360°/n)</code>，一次生成10個頂點的列表 <code>Vlist</code>。</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div>
+          <h4>建立外框多邊形與輻射線</h4>
+          <p><code>Polygon(Vlist)</code> 建外框；<code>Sequence(Segment(O, Element(Vlist,k)),…)</code> 建10條輻射線。</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div>
+          <h4>建立三組 String Art（雙重 Sequence）</h4>
+          <p>外層迴圈跑10個扇形（k = 1…n），內層迴圈跑 m−1 條線段（j = 1…m−1）。利用 <code>Mod(k,n)+1</code> 處理最後一個扇形的循環銜接。</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">5</div>
+        <div>
+          <h4>樣式設定與匯出</h4>
+          <p>將所有線段設為深綠色、去除多邊形填色、隱藏格線與座標軸，最後匯出 <code>.ggb</code> 檔。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ 技術亮點 -->
+  <div class="card">
+    <h2><span class="icon">✨</span>技術亮點與規範遵守</h2>
+    <ul>
+      <li><strong>全程使用 Sequence 指令：</strong>共建立 3 × (10 × 39) = <strong>1,170 條</strong>線段，沒有任何逐一建立的物件</li>
+      <li><strong>零 hard-coded 數字：</strong>所有座標均由 GeoGebra 用極座標 <code>(r; 角度)</code> 在內部計算，n、r、m 三個自由參數修改後圖形即時更新</li>
+      <li><strong>Mod 處理循環邊界：</strong><code>Mod(k, n) + 1</code> 使第10個扇形的第二頂點正確回到 V₁，閉合多邊形</li>
+      <li><strong>唯一自由物件說明：</strong>O = (0,0) 是初始條件，必須為自由點（圓心位置是幾何圖的初始條件，無法由其他物件推導）</li>
+      <li><strong>命名規範：</strong>頂點清單 Vlist 使用大寫開頭，複合名稱使用底線，下標符合 <code>name_{sub}</code> 格式</li>
+    </ul>
+    <div class="tags">
+      <span class="tag">String Art</span>
+      <span class="tag">Envelope Curve</span>
+      <span class="tag">Parabola Envelope</span>
+      <span class="tag">Sequence Command</span>
+      <span class="tag">Regular Polygon</span>
+      <span class="tag">GeoGebra Classic</span>
+      <span class="tag">Mod Wrap-around</span>
+    </div>
+  </div>
+
+  <!-- ⑦ 交付成果 -->
+  <div class="card">
+    <h2><span class="icon">📦</span>交付成果</h2>
+    <ul>
+      <li><strong>string_art_decagon.ggb</strong>：完整 GeoGebra 構建檔，已下載至本機</li>
+      <li><strong>本 HTML 報告</strong>：含幾何分析、完整指令、構建步驟與技術說明</li>
+    </ul>
+    <p style="margin-top:14px;font-size:14px;color:#555;">
+      如需調整圖案密度，可將 <code>m</code> 改為更大的值（如 60、80）；如需不同多邊形，可修改 <code>n</code>（如 n=8 八邊形、n=12 十二邊形）。
+    </p>
+  </div>
+
+</main>
+
+<footer>
+  GeoGebra 製圖報告 · 正十邊形 String Art 包絡線 · 以 GeoGebra Classic 線上版製作
+</footer>
+
+</body>
+</html>
