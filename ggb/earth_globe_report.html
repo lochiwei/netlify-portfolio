@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GeoGebra 3D 地球儀製作報告</title>
+<style>
+:root { --ink:#18212b; --muted:#5d6875; --line:#d8dee6; --blue:#1557d6; --cyan:#dff8fb; --green:#1d6847; --panel:#f7f9fb; --warn:#8a5b00; }
+* { box-sizing:border-box; }
+body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",Arial,sans-serif; color:var(--ink); background:#ffffff; line-height:1.55; }
+header { padding:32px 40px 20px; border-bottom:1px solid var(--line); background:linear-gradient(180deg,#f8fbff,#fff); }
+h1 { margin:0 0 8px; font-size:30px; letter-spacing:0; }
+.subtitle { color:var(--muted); max-width:960px; }
+main { max-width:1180px; margin:0 auto; padding:28px 32px 64px; }
+.actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+.actions a, button { border:1px solid var(--line); background:#fff; color:var(--ink); padding:8px 12px; border-radius:6px; text-decoration:none; font:inherit; cursor:pointer; }
+.actions a.primary { background:var(--blue); color:#fff; border-color:var(--blue); }
+.grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:22px 0; }
+.metric { border:1px solid var(--line); border-radius:8px; padding:14px; background:var(--panel); }
+.metric b { display:block; font-size:22px; }
+.metric span { color:var(--muted); font-size:13px; }
+.tabs { display:flex; gap:6px; border-bottom:1px solid var(--line); margin-top:26px; flex-wrap:wrap; }
+.tab { border:0; border-bottom:3px solid transparent; border-radius:0; background:transparent; padding:10px 12px; }
+.tab.active { border-bottom-color:var(--blue); color:var(--blue); font-weight:700; }
+.panel { display:none; padding-top:20px; }
+.panel.active { display:block; }
+table { border-collapse:collapse; width:100%; margin:12px 0 24px; }
+th,td { border:1px solid var(--line); padding:10px 12px; vertical-align:top; }
+th { background:#f0f4f8; text-align:left; }
+code, pre { font-family:"SFMono-Regular",Consolas,Menlo,monospace; }
+pre { background:#0f1720; color:#e8f0f8; padding:14px; border-radius:8px; overflow:auto; font-size:13px; }
+details { border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin:10px 0; background:#fff; }
+summary { cursor:pointer; font-weight:700; }
+.badge { display:inline-block; padding:2px 8px; border-radius:999px; background:var(--cyan); color:#064d58; font-size:12px; font-weight:700; }
+.note { border-left:4px solid var(--blue); padding:10px 14px; background:#f5f8ff; margin:14px 0; }
+.warn { border-left:4px solid var(--warn); padding:10px 14px; background:#fff8e8; margin:14px 0; }
+.flow { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin:14px 0 24px; }
+.step { border:1px solid var(--line); border-radius:8px; padding:12px; background:#fff; position:relative; min-height:110px; }
+.step b { color:var(--blue); }
+.small { color:var(--muted); font-size:13px; }
+@media (max-width:850px) { .grid,.flow { grid-template-columns:1fr; } main,header { padding-left:18px; padding-right:18px; } }
+@media print { .tabs,.actions,button { display:none; } .panel { display:block; } body { font-size:12px; } }
+</style>
+</head>
+<body>
+<header>
+<h1>GeoGebra 3D 地球儀製作報告</h1>
+<div class="subtitle">整理目前作圖的步驟、方法、設計取捨與資料來源。此頁是靜態 HTML，可直接用瀏覽器開啟或另存下載。</div>
+<div class="actions">
+<a class="primary" href="resources/earth_globe_3d.ggb" download>下載 GGB 檔</a>
+<a href="resources/earth_globe_3d_commands.txt" download>下載指令清單</a>
+<a href="resources/geogebra_macro.xml" download>下載 GeoPoint 工具 XML</a>
+<a href="resources/ne_50m_coastline.geojson" download>下載海岸線資料</a>
+<button onclick="window.print()">列印 / 存成 PDF</button>
+</div>
+</header>
+<main>
+<section class="grid">
+<div class="metric"><b>152</b><span>海岸線子列表</span></div>
+<div class="metric"><b>3797</b><span>動態簡化後總座標點</span></div>
+<div class="metric"><b>468</b><span>目前單條最大點數</span></div>
+<div class="metric"><b>34 KB</b><span>GGB 檔案大小</span></div>
+</section>
+<div class="tabs" role="tablist">
+<button class="tab active" data-tab="overview">總覽</button>
+<button class="tab" data-tab="steps">製作流程</button>
+<button class="tab" data-tab="commands">指令與結構</button>
+<button class="tab" data-tab="data">資料來源</button>
+<button class="tab" data-tab="notes">注意事項</button>
+</div>
+<section id="overview" class="panel active">
+<h2>目標與成果</h2>
+<table>
+<tr><th>需求</th><th>做法</th></tr>
+<tr><td>可旋轉的 3D 地球儀</td><td>使用 GeoGebra 3D 視圖，球面以 <code>Sphere(O, r)</code> 建立。</td></tr>
+<tr><td>經緯度線</td><td>避免 <code>Sequence(Curve(...))</code> 不渲染，改用經緯度列表 + <code>GeoPoint</code> + <code>Polyline</code>。</td></tr>
+<tr><td>兩自由點與最短路徑</td><td><code>P = Point(globe)</code>、<code>Q = Point(globe)</code>，路徑用 <code>CircularArc(O, Pdraw, Qdraw)</code>。</td></tr>
+<tr><td>近似世界地圖</td><td>使用 Natural Earth 1:50m coastline 真實海岸線資料，轉成球面 polyline。</td></tr>
+<tr><td>代數區簡潔</td><td>全部海岸線收在單一 <code>coastCoords</code> list of list，透過外層 <code>Zip</code> 一次生成。</td></tr>
+</table>
+<div class="note">目前版本保留 <code>GeoPoint(&lt;point&gt;, &lt;radius&gt;)</code> 自製工具作為語意化轉換工具：輸入 <code>(longitude, latitude)</code> 與半徑，輸出球面 3D 點。</div>
+</section>
+<section id="steps" class="panel">
+<h2>製作流程</h2>
+<div class="flow">
+<div class="step"><b>1. 建立球面</b><p>定義 <code>r</code>、<code>drawR</code>、球心 <code>O</code> 與 <code>globe = Sphere(O, r)</code>。</p></div>
+<div class="step"><b>2. 建立 GeoPoint</b><p>把經緯度點轉為球面 3D 點，避免主構圖中反覆展開三角公式。</p></div>
+<div class="step"><b>3. 處理海岸線</b><p>讀入 Natural Earth 50m coastline，切開日期變更線，做 Douglas-Peucker 簡化。</p></div>
+<div class="step"><b>4. 批次繪圖</b><p>用 <code>coastCoords</code> 保存所有海岸線，再用 <code>Zip</code> 一次生成全部 polyline。</p></div>
+<div class="step"><b>5. 修正可見性</b><p>線條繪在 <code>drawR</code> 外層；經緯線也改用 <code>Polyline</code>，避免 3D Curve list 不顯示。</p></div>
+</div>
+<table>
+<tr><th>處理項目</th><th>方法</th><th>理由</th></tr>
+<tr><td>點數分配</td><td>依海岸線長度動態分配</td><td>大洲輪廓保留較多細節，小島避免過度細緻。</td></tr>
+<tr><td>視圖設定</td><td>開啟 Algebra + 3D Graphics</td><td>GeoGebra 檔案開啟時直接可見繪圖區。</td></tr>
+<tr><td>最短距離</td><td><code>theta = Angle(P, O, Q)</code>，真實距離可用 <code>6371 * theta</code></td><td>優先使用 GeoGebra 原生命令，避免手寫 dot product。</td></tr>
+</table>
+</section>
+<section id="commands" class="panel">
+<h2>核心指令</h2>
+<details open><summary>目前核心指令節錄</summary><pre>r = 3.5
+drawR = r * 1.04
+globe = Sphere(O, r)
+latitudeCoords = Sequence(Sequence((lambda, phi), lambda, -180, 180, 10), phi, -latMax, latMax, latStep)
+longitudeCoords = Sequence(Sequence((lambda, phi), phi, -90, 90, 10), lambda, -180, 165, lonStep)
+latitudeLines = Zip(Polyline(Zip(GeoPoint(C, drawR), C, coords)), coords, latitudeCoords)
+longitudeLines = Zip(Polyline(Zip(GeoPoint(C, drawR), C, coords)), coords, longitudeCoords)
+coastCoords = {{(180, 68.9834), (170.161, 69.6266), (170.538, 68.8254), (166.82, 69.4996), (161.566, 68.9052), (160.911, 69.6063), (159.912, 70.5061), (152.509, 70.8345), (150.668, 71.4552), (150.017, 71.8957), (145.189, 71.6958), (145.759, 72.2259), (146.832, 72.2954), (144.169, 72.2588), (141.079, 72.5869), (139.359, 71.9514), (137.918, 71.3841), (137.94, 71.1334), (132.654, 71.926), (128.843, 71.6635), (129.21, 71.9169), (129.284, 72.092), (129.25, 72.7052), (124.541, 73.7513), (123.622, 73.1 ... }
+coastlines = Zip(Polyline(Zip(GeoPoint(C, drawR), C, coords)), coords, coastCoords)
+theta = Angle(P, O, Q)
+greatCirclePath = CircularArc(O, Pdraw, Qdraw)
+d_{PQ} = r * theta</pre></details>
+<table>
+<tr><th>物件</th><th>意義</th></tr>
+<tr><td><code>coastCoords</code></td><td>所有海岸線的 list of list，每個子列表是一條海岸線的經緯度點。</td></tr>
+<tr><td><code>coastlines</code></td><td>外層 <code>Zip</code> 逐條取出海岸線，內層 <code>Zip</code> 將經緯度轉成球面點，再以 <code>Polyline</code> 繪製。</td></tr>
+<tr><td><code>latitudeLines</code> / <code>longitudeLines</code></td><td>以同樣的列表轉換方式建立，避開 <code>Curve</code> list 渲染問題。</td></tr>
+<tr><td><code>greatCirclePath</code></td><td>使用 <code>CircularArc</code> 表示兩點間的大圓弧。</td></tr>
+</table>
+<details><summary>GeoPoint 的數學意義</summary><p>若 <code>C=(longitude, latitude)</code>，半徑為 <code>drawR</code>，則轉換為：</p><pre>X = drawR cos(latitude) cos(longitude)
+Y = drawR cos(latitude) sin(longitude)
+Z = drawR sin(latitude)</pre><p>角度會乘上 <code>pi / 180</code> 轉成弧度。</p></details>
+</section>
+<section id="data" class="panel">
+<h2>參考資料與來源</h2>
+<table>
+<tr><th>資料</th><th>用途</th><th>來源</th></tr>
+<tr><td>Natural Earth 1:50m Physical Vectors - Coastline</td><td>世界海岸線與主要島嶼輪廓</td><td><a href="https://www.naturalearthdata.com/downloads/50m-physical-vectors/">Natural Earth 1:50m Physical Vectors</a></td></tr>
+<tr><td>Natural Earth Terms of Use</td><td>確認資料授權</td><td><a href="https://www.naturalearthdata.com/about/terms-of-use">Natural Earth Terms of Use</a></td></tr>
+<tr><td>QuickMapTools Coastline 說明</td><td>確認 coastline dataset 屬性與尺度</td><td><a href="https://www.quickmaptools.com/download-natural-earth/coastline">QuickMapTools Coastline</a></td></tr>
+</table>
+<p class="small">Natural Earth 官方條款頁說明其 raster 與 vector map data 為 public domain；QuickMapTools 的 coastline 頁面也描述 coastline dataset 是 Natural Earth/NACIS 維護的 public domain vector layer。</p>
+</section>
+<section id="notes" class="panel">
+<h2>注意事項與踩坑紀錄</h2>
+<div class="warn"><b>3D 視圖 ID：</b>本機 GeoGebra Classic 開檔時，需使用可見的 3D Graphics View 設定；錯誤的 view id 會開成設定面板或空白區域。</div>
+<div class="warn"><b>Curve list 問題：</b><code>Sequence(Curve(...))</code> 的代數物件可能存在但 3D 視圖不渲染。因此經緯線改用 <code>Polyline</code>。</div>
+<div class="warn"><b>線條半徑：</b>海岸線、經緯線與最短路徑畫在 <code>drawR</code>，略大於球半徑 <code>r</code>，避免被半透明球面遮住。</div>
+<div class="note"><b>後續可調參數：</b><code>SIMPLIFY_EPSILON_DEGREES</code> 控制海岸線簡化程度；動態點數預算控制大洲與小島細節分配。</div>
+</section>
+</main>
+<script>
+for (const tab of document.querySelectorAll('.tab')) {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+}
+</script>
+</body>
+</html>

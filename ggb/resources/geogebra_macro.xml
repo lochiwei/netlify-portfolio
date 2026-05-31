@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<geogebra format="5.0" version="5.4.925.3" app="classic" platform="d"
+          xsi:noNamespaceSchemaLocation="https://www.geogebra.org/apps/xsd/ggt.xsd"
+          xmlns="" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<macro cmdName="GeoPoint" toolName="GeoPoint"
+       toolHelp="GeoPoint(&lt;LongitudeLatitudePoint&gt;,&lt;Radius&gt;)"
+       iconFile="" showInToolBar="true" copyCaptions="true" viewId="512">
+  <macroInput a0="C" a1="drawR"/>
+  <macroOutput a0="G"/>
+  <construction title="GeoPoint custom tool" author="Codex" date="2026-05-31">
+    <expression label="C" exp="(120, 23)" type="point"/>
+    <element type="point" label="C">
+  <show object="true" label="false"/>
+  <objColor r="0" g="74" b="180" alpha="1.000"/>
+  <labelMode val="0"/>
+  <layer val="0"/>
+  <lineStyle thickness="1" type="0" typeHidden="1"/>
+  <caption val="輸入點；x 為經度、y 為緯度"/>
+</element>
+    <expression label="drawR" exp="3.5"/>
+    <element type="numeric" label="drawR">
+  <value val="3.5"/>
+  <show object="false" label="false"/>
+  <caption val="輸入半徑"/>
+  <labelMode val="0"/>
+</element>
+    <expression label="G" exp="(drawR * cos(y(C) * pi / 180) * cos(x(C) * pi / 180), drawR * cos(y(C) * pi / 180) * sin(x(C) * pi / 180), drawR * sin(y(C) * pi / 180))" type="point3d"/>
+    <element type="point3d" label="G">
+  <show object="true" label="false"/>
+  <objColor r="23" g="84" b="52" alpha="0.961"/>
+  <labelMode val="0"/>
+  <layer val="0"/>
+  <lineStyle thickness="1" type="0" typeHidden="1"/>
+  <caption val="輸出的球面 3D 點"/>
+</element>
+  </construction>
+</macro>
+</geogebra>
