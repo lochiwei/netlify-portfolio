@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>長方體平面投影面積互動報告</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #617083;
+      --line: #d9e0e7;
+      --panel: #ffffff;
+      --soft: #f6f8fb;
+      --blue: #1f57d6;
+      --green: #27924c;
+      --red: #c9463f;
+      --purple: #8b69c9;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #eef2f6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      line-height: 1.58;
+    }
+
+    header {
+      padding: 28px clamp(18px, 4vw, 48px) 18px;
+      background: linear-gradient(180deg, #ffffff 0%, #f5f8fb 100%);
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 20px 0 8px;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+
+    p { margin: 0 0 12px; }
+
+    code {
+      padding: 1px 5px;
+      border-radius: 5px;
+      background: #eef3f7;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    a { color: var(--blue); }
+
+    .summary {
+      max-width: 1040px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.92fr) minmax(440px, 1.25fr);
+      gap: 18px;
+      padding: 18px clamp(14px, 3vw, 32px) 32px;
+      align-items: start;
+    }
+
+    section, .visual-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 8px 22px rgba(21, 33, 50, 0.06);
+    }
+
+    section {
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .visual-panel {
+      position: sticky;
+      top: 14px;
+      padding: 16px;
+    }
+
+    .steps {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .step {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      text-align: left;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .step strong { display: block; margin-bottom: 4px; }
+    .step span { color: var(--muted); font-size: 14px; }
+    .step.active { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(31, 87, 214, 0.12); }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(92px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .control {
+      padding: 10px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .control label {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 12px 0 14px;
+    }
+
+    .stat {
+      padding: 11px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+
+    .stat strong {
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .viewer {
+      width: 100%;
+      min-height: 430px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .formula {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      overflow-x: auto;
+      white-space: nowrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .swatch {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      margin-right: 5px;
+      vertical-align: -1px;
+      border: 1px solid rgba(0,0,0,0.16);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .note {
+      padding: 12px;
+      border-left: 4px solid var(--blue);
+      background: #f2f6ff;
+      border-radius: 6px;
+      color: #29415f;
+    }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .visual-panel { position: static; }
+      .controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stats { grid-template-columns: 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>長方體在平面上的投影面積</h1>
+    <p class="summary">這份互動報告整理 GeoGebra 作圖流程，並用同一組參數即時模擬長方體、垂直投影與面積公式。調整滑桿時，可以觀察尺寸與角度如何共同影響投影面積。</p>
+  </header>
+
+  <main class="layout">
+    <div>
+      <section>
+        <h2>作圖目標</h2>
+        <p>建立一個可調整的 3D 長方體，使用 <code>a,b,c</code> 控制長、寬、高，使用 <code>α,β</code> 控制雙軸傾斜，並觀察它垂直投影到水平平面 <code>z=0</code> 的面積。</p>
+        <p>GeoGebra 檔案：<a href="resources/cuboid_projection_area.ggb">cuboid_projection_area.ggb</a></p>
+        <div class="note">角度定義：<code>α</code> 是繞 x 軸的傾斜，<code>β</code> 是繞 y 軸的傾斜。投影是垂直正交投影，不是視覺透視投影。</div>
+      </section>
+
+      <section>
+        <h2>互動作圖流程</h2>
+        <p>點選任一步驟，右側示意圖會突出該階段使用的幾何物件。</p>
+        <div class="steps">
+          <button class="step active" data-step="basis"><strong>1. 建立旋轉基底</strong><span>由 <code>α,β</code> 產生三個方向向量 <code>u,v,w</code>。</span></button>
+          <button class="step" data-step="vertices"><strong>2. 推導八個頂點</strong><span>用中心點與 <code>a,b,c</code> 沿三個方向加減得到 A 到 H。</span></button>
+          <button class="step" data-step="faces"><strong>3. 建立多色面與黑色外框</strong><span>六個面以半透明顏色呈現，外框用粗黑線模仿截圖。</span></button>
+          <button class="step" data-step="projection"><strong>4. 投影到平面</strong><span>每個頂點投影為 <code>(x(P), y(P), 0)</code>，用虛線連到地面。</span></button>
+          <button class="step" data-step="area"><strong>5. 計算投影面積</strong><span>投影面積由三組相鄰面的水平投影貢獻相加。</span></button>
+        </div>
+      </section>
+
+      <section>
+        <h2>核心 GeoGebra 指令</h2>
+        <h3>方向向量</h3>
+        <p><code>u = (cos(β), sin(α) sin(β), -cos(α) sin(β))</code></p>
+        <p><code>v = (0, cos(α), sin(α))</code></p>
+        <p><code>w = (sin(β), -sin(α) cos(β), cos(α) cos(β))</code></p>
+        <h3>頂點與投影</h3>
+        <p><code>A = O + a / 2 u + b / 2 v - c / 2 w</code>，其餘頂點用相同的加減結構得到。</p>
+        <p><code>A_p = (x(A), y(A), 0)</code>，其餘投影點同理。</p>
+        <h3>投影多邊形</h3>
+        <p><code>Polygon({C_p, D_p, H_p, E_p, F_p, B_p})</code></p>
+      </section>
+
+      <section>
+        <h2>製圖策略</h2>
+        <div class="two-col">
+          <div>
+            <h3>保持代數區清楚</h3>
+            <p>投影面使用點列建立，不額外逐一建立不需要的邊物件；外框才使用 <code>Polyline</code>。</p>
+          </div>
+          <div>
+            <h3>不使用外部座標</h3>
+            <p>所有頂點、投影點與面積都由 GeoGebra 內部的滑桿與指令推導。</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <aside class="visual-panel">
+      <h2>互動示意</h2>
+      <div class="controls">
+        <div class="control"><label><span>a 長</span><strong id="aVal"></strong></label><input id="a" type="range" min="1" max="6" step="0.1" value="4"></div>
+        <div class="control"><label><span>b 寬</span><strong id="bVal"></strong></label><input id="b" type="range" min="1" max="5" step="0.1" value="2.6"></div>
+        <div class="control"><label><span>c 高</span><strong id="cVal"></strong></label><input id="c" type="range" min="0.5" max="5" step="0.1" value="2.2"></div>
+        <div class="control"><label><span>α</span><strong id="alphaVal"></strong></label><input id="alpha" type="range" min="0" max="90" step="1" value="36"></div>
+        <div class="control"><label><span>β</span><strong id="betaVal"></strong></label><input id="beta" type="range" min="0" max="90" step="1" value="42"></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><span>投影面積</span><strong id="areaVal"></strong></div>
+        <div class="stat"><span>底面投影</span><strong id="baseVal"></strong></div>
+        <div class="stat"><span>側面投影</span><strong id="sideVal"></strong></div>
+      </div>
+      <svg class="viewer" id="viewer" viewBox="0 0 820 520" role="img" aria-label="長方體與投影面積互動示意圖"></svg>
+      <div class="legend">
+        <span><i class="swatch" style="background:#2a9d45"></i>長方體面</span>
+        <span><i class="swatch" style="background:#4869ff"></i>投影面</span>
+        <span><i class="swatch" style="background:#111"></i>外框與垂線</span>
+        <span><i class="swatch" style="background:#ddd"></i>水平平面</span>
+      </div>
+      <h3>面積公式</h3>
+      <div class="formula" id="formula"></div>
+    </aside>
+  </main>
+
+  <script>
+    const svg = document.getElementById("viewer");
+    const controls = ["a", "b", "c", "alpha", "beta"].map((id) => document.getElementById(id));
+    const active = { step: "basis" };
+
+    document.querySelectorAll(".step").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".step").forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        active.step = button.dataset.step;
+        render();
+      });
+    });
+
+    controls.forEach((control) => control.addEventListener("input", render));
+
+    function rad(deg) {
+      return deg * Math.PI / 180;
+    }
+
+    function add(p, q) {
+      return [p[0] + q[0], p[1] + q[1], p[2] + q[2]];
+    }
+
+    function scale(s, p) {
+      return [s * p[0], s * p[1], s * p[2]];
+    }
+
+    function pointString(points) {
+      return points.map((p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+    }
+
+    function project(p) {
+      const s = 54;
+      const x = 410 + (p[0] - p[1]) * s;
+      const y = 348 + (p[0] + p[1]) * 0.28 * s - p[2] * 0.78 * s;
+      return [x, y];
+    }
+
+    function el(name, attrs = {}, text = "") {
+      const node = document.createElementNS("http://www.w3.org/2000/svg", name);
+      Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+      if (text) node.textContent = text;
+      return node;
+    }
+
+    function polygon(points, attrs) {
+      return el("polygon", { points: pointString(points), ...attrs });
+    }
+
+    function polyline(points, attrs) {
+      return el("polyline", { points: pointString(points), fill: "none", ...attrs });
+    }
+
+    function line(p, q, attrs) {
+      return el("line", { x1: p[0], y1: p[1], x2: q[0], y2: q[1], ...attrs });
+    }
+
+    function render() {
+      const a = Number(document.getElementById("a").value);
+      const b = Number(document.getElementById("b").value);
+      const c = Number(document.getElementById("c").value);
+      const alphaDeg = Number(document.getElementById("alpha").value);
+      const betaDeg = Number(document.getElementById("beta").value);
+      const alpha = rad(alphaDeg);
+      const beta = rad(betaDeg);
+
+      const u = [Math.cos(beta), Math.sin(alpha) * Math.sin(beta), -Math.cos(alpha) * Math.sin(beta)];
+      const v = [0, Math.cos(alpha), Math.sin(alpha)];
+      const w = [Math.sin(beta), -Math.sin(alpha) * Math.cos(beta), Math.cos(alpha) * Math.cos(beta)];
+      const O = [0, 0, c + 1.2];
+
+      const A = add(add(add(O, scale(a / 2, u)), scale(b / 2, v)), scale(-c / 2, w));
+      const B = add(add(add(O, scale(-a / 2, u)), scale(b / 2, v)), scale(-c / 2, w));
+      const C = add(add(add(O, scale(-a / 2, u)), scale(-b / 2, v)), scale(-c / 2, w));
+      const D = add(add(add(O, scale(a / 2, u)), scale(-b / 2, v)), scale(-c / 2, w));
+      const E = add(A, scale(c, w));
+      const F = add(B, scale(c, w));
+      const G = add(C, scale(c, w));
+      const H = add(D, scale(c, w));
+      const points = { A, B, C, D, E, F, G, H };
+      const projected = Object.fromEntries(Object.entries(points).map(([key, value]) => [key, [value[0], value[1], 0]]));
+
+      const areaBase = a * b * Math.cos(alpha) * Math.cos(beta);
+      const areaSideA = a * c * Math.sin(alpha);
+      const areaSideB = b * c * Math.cos(alpha) * Math.sin(beta);
+      const area = areaBase + areaSideA + areaSideB;
+
+      document.getElementById("aVal").textContent = a.toFixed(1);
+      document.getElementById("bVal").textContent = b.toFixed(1);
+      document.getElementById("cVal").textContent = c.toFixed(1);
+      document.getElementById("alphaVal").textContent = `${alphaDeg}°`;
+      document.getElementById("betaVal").textContent = `${betaDeg}°`;
+      document.getElementById("areaVal").textContent = area.toFixed(3);
+      document.getElementById("baseVal").textContent = areaBase.toFixed(3);
+      document.getElementById("sideVal").textContent = (areaSideA + areaSideB).toFixed(3);
+      document.getElementById("formula").textContent =
+        `A = ab cos(α) cos(β) + ac sin(α) + bc cos(α) sin(β) = ${area.toFixed(3)}`;
+
+      svg.replaceChildren();
+
+      const ground = [[-4.8, -3.4, 0], [5.0, -3.4, 0], [5.0, 3.4, 0], [-4.8, 3.4, 0]].map(project);
+      svg.appendChild(polygon(ground, { fill: "#d4d8dc", opacity: "0.62", stroke: "#bcc4cc", "stroke-width": "1" }));
+
+      const projectionPoly = ["C", "D", "H", "E", "F", "B"].map((key) => project(projected[key]));
+      svg.appendChild(polygon(projectionPoly, {
+        fill: active.step === "projection" || active.step === "area" ? "#476bff" : "#6f86ff",
+        opacity: active.step === "projection" || active.step === "area" ? "0.45" : "0.25",
+        stroke: "#1f57d6",
+        "stroke-width": active.step === "projection" || active.step === "area" ? "5" : "3"
+      }));
+
+      Object.keys(points).forEach((key) => {
+        svg.appendChild(line(project(points[key]), project(projected[key]), {
+          stroke: key === "G" ? "#c92822" : "#111",
+          "stroke-width": active.step === "projection" ? "3.5" : "2.4",
+          "stroke-dasharray": "7 7",
+          opacity: active.step === "projection" || active.step === "area" ? "0.95" : "0.58"
+        }));
+      });
+
+      const faces = [
+        { keys: ["A", "B", "C", "D"], fill: "#27924c", opacity: 0.74 },
+        { keys: ["E", "F", "G", "H"], fill: "#b7c4df", opacity: 0.68 },
+        { keys: ["A", "B", "F", "E"], fill: "#8b69c9", opacity: 0.62 },
+        { keys: ["B", "C", "G", "F"], fill: "#d96a86", opacity: 0.62 },
+        { keys: ["C", "D", "H", "G"], fill: "#e59d70", opacity: 0.58 },
+        { keys: ["D", "A", "E", "H"], fill: "#e2a1a8", opacity: 0.6 }
+      ];
+
+      faces
+        .map((face) => ({ ...face, depth: face.keys.reduce((sum, key) => sum + points[key][1] - points[key][0] * 0.2, 0) / face.keys.length }))
+        .sort((m, n) => n.depth - m.depth)
+        .forEach((face) => {
+          svg.appendChild(polygon(face.keys.map((key) => project(points[key])), {
+            fill: face.fill,
+            opacity: active.step === "faces" || active.step === "vertices" ? Math.min(0.86, face.opacity + 0.12) : face.opacity,
+            stroke: "#111",
+            "stroke-width": active.step === "faces" ? "3" : "2"
+          }));
+        });
+
+      const edgePaths = [
+        ["A", "B", "C", "D", "A"],
+        ["E", "F", "G", "H", "E"],
+        ["A", "E"], ["B", "F"], ["C", "G"], ["D", "H"]
+      ];
+      edgePaths.forEach((path) => {
+        svg.appendChild(polyline(path.map((key) => project(points[key])), {
+          stroke: "#080808",
+          "stroke-width": active.step === "faces" ? "5.5" : "4.2",
+          "stroke-linejoin": "round",
+          "stroke-linecap": "round"
+        }));
+      });
+
+      if (active.step === "basis") {
+        [["u", u, "#c9463f"], ["v", v, "#1f57d6"], ["w", w, "#27924c"]].forEach(([label, vector, color]) => {
+          const start = project(O);
+          const end = project(add(O, scale(1.8, vector)));
+          svg.appendChild(line(start, end, { stroke: color, "stroke-width": "4", "marker-end": `url(#arrow-${label})` }));
+          svg.appendChild(el("text", { x: end[0] + 8, y: end[1] - 6, fill: color, "font-size": "18", "font-weight": "700" }, label));
+        });
+      }
+
+      const defs = el("defs");
+      [["u", "#c9463f"], ["v", "#1f57d6"], ["w", "#27924c"]].forEach(([label, color]) => {
+        const marker = el("marker", { id: `arrow-${label}`, viewBox: "0 0 10 10", refX: "8", refY: "5", markerWidth: "6", markerHeight: "6", orient: "auto-start-reverse" });
+        marker.appendChild(el("path", { d: "M 0 0 L 10 5 L 0 10 z", fill: color }));
+        defs.appendChild(marker);
+      });
+      svg.prepend(defs);
+
+      if (active.step === "vertices") {
+        Object.entries(points).forEach(([key, value]) => {
+          const p = project(value);
+          svg.appendChild(el("circle", { cx: p[0], cy: p[1], r: "6", fill: "#111" }));
+          svg.appendChild(el("text", { x: p[0] + 8, y: p[1] - 8, fill: "#555", "font-size": "18", "font-weight": "700" }, key));
+        });
+      }
+
+      if (active.step === "area") {
+        svg.appendChild(el("text", { x: 34, y: 48, fill: "#17202a", "font-size": "22", "font-weight": "700" }, `投影面積 = ${area.toFixed(3)}`));
+        svg.appendChild(el("text", { x: 34, y: 78, fill: "#617083", "font-size": "15" }, `底面 ${areaBase.toFixed(3)} + 側面 ${(areaSideA + areaSideB).toFixed(3)}`));
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
